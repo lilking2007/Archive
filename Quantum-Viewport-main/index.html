@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Gravity Galaxy</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="./src/style.css">
+    <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+                }
+            }
+        </script>
+</head>
+
+<body>
+    <div id="debug"
+        style="position:fixed; top:10px; left:10px; color:lime; font-family:monospace; pointer-events:none; z-index:999;">
+        initializing...</div>
+    <div id="instructions">
+        <h2>Gravity Galaxy</h2>
+        <p>Move windows close to engage gravitational lock.</p>
+    </div>
+    <script type="module" src="./src/main.js"></script>
+</body>
+
+</html>
