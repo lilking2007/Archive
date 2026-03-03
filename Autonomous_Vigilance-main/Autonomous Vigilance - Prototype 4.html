@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Autonomous Vigilance Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;600&display=swap');
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    background: #121826;
+    color: #f1f1f1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+  }
+
+  header {
+    width: 100%;
+    max-width: 1200px;
+    background: transparent;
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    color: #d6e3ff;
+    text-align: left;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  header svg {
+    width: 24px;
+    height: 24px;
+    fill: #d6e3ff;
+  }
+
+  #container {
+    width: 100%;
+    max-width: 1200px;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+  }
+
+  /* Left side: video and settings stacked vertically */
+  #leftPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  /* Video Section */
+  #videoSection {
+    background: #1e2235;
+    border-radius: 16px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.7);
+    padding: 0;
+    position: relative;
+    user-select: none;
+  }
+
+  #videoHeader {
+    background: #2a2f4a;
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: #d6e3ff;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  #videoHeader .buttons {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  button.iconButton {
+    background: #2a2f4a;
+    border: none;
+    border-radius: 10px;
+    padding: 0.4rem 0.8rem;
+    color: #e1e8ff;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: background 0.3s ease;
+  }
+
+  button.iconButton:hover {
+    background: #3a3f5a;
+  }
+
+  button.iconButton svg {
+    width: 16px;
+    height: 16px;
+    fill: #e1e8ff;
+  }
+
+  video {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: black;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+    object-fit: contain;
+  }
+
+  /* Fullscreen styles */
+  #videoSection:-webkit-full-screen {
+    width: 100vw !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #videoSection:-moz-full-screen {
+    width: 100vw !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #videoSection:-ms-fullscreen {
+    width: 100vw !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #videoSection:fullscreen {
+    width: 100vw !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  #videoSection > #videoHeader {
+    flex: 0 0 auto;
+  }
+
+  #videoSection > video {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: 100% !important;
+    border-radius: 0 !important;
+    object-fit: contain !important;
+  }
+
+  #videoSection > #overlayCanvas {
+    position: absolute !important;
+    top: 48px !important; /* height of videoHeader */
+    left: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    z-index: 2 !important;
+    cursor: crosshair !important;
+    user-select: none !important;
+    border-radius: 0 !important;
+  }
+
+  #videoSection > #controls {
+    flex: 0 0 auto;
+  }
+
+  #overlayCanvas {
+    position: absolute;
+    top: 48px; /* height of videoHeader */
+    left: 0;
+    width: 100%;
+    height: auto;
+    z-index: 2;
+    cursor: crosshair;
+    user-select: none;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+  }
+
+  #controls {
+    background: #2a2f4a;
+    padding: 0.9rem 1.5rem;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 1rem;
+    color: #a9c9ff;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+  }
+
+  select, option {
+    background: #121826;
+    border: none;
+    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
+    color: #f1f1f1;
+    font-weight: 600;
+  }
+
+  .buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* Settings tab buttons */
+  #subSettingsBar {
+    display: flex;
+    justify-content: space-evenly;
+    background: #1e2235;
+    border-radius: 12px;
+    padding: 0.5rem 0;
+    margin: 1rem 0;
+  }
+
+  #subSettingsBar button {
+    background: #2a2f4a;
+    border: none;
+    border-radius: 10px;
+    padding: 0.5rem 1.5rem;
+    color: #e1e8ff;
+    font-weight: 600;
+    cursor: pointer;
+    width: 45%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  #subSettingsBar button.active {
+    background-color: #4a63c8;
+    box-shadow: 0 0 12px #4a63c8;
+  }
+
+  #subSettingsBar button:hover {
+    background-color: #3a4a99;
+  }
+
+  #subSettingsBar button svg {
+    width: 18px;
+    height: 18px;
+    fill: #e1e8ff;
+  }
+
+  /* Settings sections stacked vertically */
+  section.settingsSection {
+    background: #1e2235;
+    border-radius: 16px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.7);
+    padding: 1rem 1.5rem;
+    user-select: none;
+    transition: opacity 0.4s ease, max-height 0.4s ease;
+    overflow: hidden;
+  }
+
+  section.settingsSection[style*="display: none"] {
+    opacity: 0;
+    max-height: 0;
+    padding: 0 1.5rem;
+  }
+
+  section.settingsSection[style*="display: block"] {
+    opacity: 1;
+    max-height: 1000px;
+    padding: 1rem 1.5rem;
+  }
+
+  section.settingsSection h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: #a9c9ff;
+    border-bottom: 1px solid #3a3a3a;
+    padding-bottom: 0.5rem;
+  }
+
+  /* Camera Settings */
+  #cameraSettingsControls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  /* Detection Zones */
+  #detectionZones label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* Moved buttons below video */
+  .movedButtons {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    background: #2a2f4a;
+    border-radius: 12px;
+    padding: 0.5rem 1rem;
+    display: flex;
+    gap: 0.75rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+    user-select: none;
+  }
+
+  #detectionZones input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+  }
+
+  #detectionZones input[type="range"] {
+    width: 100%;
+  }
+
+  /* Notifications */
+  #notifications label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  #notifications input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+  }
+
+  #notifications textarea {
+    background: #121826;
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    font-family: 'Montserrat', sans-serif;
+    resize: vertical;
+    min-height: 80px;
+    color: #f1f1f1;
+    width: 100%;
+    margin-top: 0.3rem;
+  }
+
+  #notifications small.description {
+    color: #7d7d9a;
+    margin-top: 0.3rem;
+    display: block;
+  }
+
+  /* Right Panel: Event Log */
+  #eventLog {
+    background: #1e2235;
+    border-radius: 16px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.7);
+    padding: 1rem 1.5rem;
+    font-size: 0.95rem;
+    color: #adc6ff;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #eventLog h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: #a9c9ff;
+    border-bottom: 1px solid #3a3a3a;
+    padding-bottom: 0.5rem;
+    user-select: none;
+  }
+
+  #events {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .event-entry {
+    padding: 0.3rem 0.5rem;
+    border-bottom: 1px solid #2d4b8a;
+    font-size: 0.9rem;
+  }
+
+  .event-timestamp {
+    font-size: 0.75rem;
+    color: #8ca3ff;
+    margin-right: 0.8rem;
+    user-select: text;
+  }
+
+  /* Scrollbar */
+  #events::-webkit-scrollbar {
+    width: 8px;
+  }
+  #events::-webkit-scrollbar-thumb {
+    background-color: #4169e1;
+    border-radius: 4px;
+  }
+
+  @media (max-width: 1100px) {
+    #container {
+      grid-template-columns: 1fr;
+    }
+    #eventLog {
+      width: 100%;
+      margin-top: 1rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    #subSettingsBar {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    #subSettingsBar button {
+      width: 100% !important;
+      font-size: 1rem;
+    }
+  }
+</style>
+</head>
+<body>
+<!-- Login Modal -->
+<div id="loginModal" aria-modal="true" role="dialog" aria-labelledby="loginTitle" aria-describedby="loginDesc" style="position: fixed; inset: 0; background: rgba(18, 24, 38, 0.95); display: flex; justify-content: center; align-items: center; z-index: 9999;">
+  <div style="background: #1e2235; padding: 2rem; border-radius: 16px; box-shadow: 0 6px 15px rgba(0,0,0,0.7); width: 320px; font-family: 'Montserrat', sans-serif; color: #f1f1f1;">
+    <h2 id="loginTitle" style="margin-top: 0; margin-bottom: 1rem; font-weight: 600; text-align: center;">Login</h2>
+    <p id="loginDesc" style="margin-bottom: 1.5rem; text-align: center; color: #a9c9ff;">Please enter your credentials</p>
+    <form id="loginForm" novalidate>
+      <label for="username" style="display: block; font-weight: 600; margin-bottom: 0.25rem;">Username</label>
+      <input type="text" id="username" name="username" autocomplete="username" required style="width: 100%; padding: 0.5rem; border-radius: 8px; border: none; margin-bottom: 1rem; font-size: 1rem; background: #121826; color: #f1f1f1;" />
+      <label for="password" style="display: block; font-weight: 600; margin-bottom: 0.25rem;">Password</label>
+      <input type="password" id="password" name="password" autocomplete="current-password" required style="width: 100%; padding: 0.5rem; border-radius: 8px; border: none; margin-bottom: 1rem; font-size: 1rem; background: #121826; color: #f1f1f1;" />
+      <div id="loginError" role="alert" style="color: #ff6347; font-weight: 600; margin-bottom: 1rem; display: none; text-align: center;">Invalid username or password.</div>
+      <button type="submit" style="width: 100%; padding: 0.75rem; border-radius: 12px; border: none; background-color: #4a63c8; color: #e1e8ff; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background-color 0.3s ease;">Log In</button>
+    </form>
+  </div>
+</div>
+
+<header aria-label="Autonomous Vigilance">
+  <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z"/></svg>
+  AUTONOMOUS VIGILANCE
+</header>
+
+<div id="container">
+  <div id="leftPanel">
+    <section id="videoSection" aria-label="Live Camera Feed">
+      <div id="videoHeader">
+        Live Camera Feed
+      </div>
+      <video id="webcamVideo" autoplay muted playsinline></video>
+      <canvas id="overlayCanvas"></canvas>
+      <div id="controls">
+      <div class="buttons">
+        <button id="snapshotBtn" class="iconButton" aria-label="Take Snapshot" title="Take Snapshot">
+          <svg viewBox="0 0 24 24"><path d="M20 5h-3.17l-1.84-2H8.99L7.15 5H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zM12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg>
+          Take Snapshot
+        </button>
+        <button id="clearZoneBtn" class="iconButton" aria-label="Clear Zone" title="Clear Zone">
+          <svg viewBox="0 0 24 24"><path d="M3 6h18v2H3z"/></svg>
+          Clear Zone
+        </button>
+          <button id="playBtn" class="iconButton" aria-label="Record" title="Record">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            Record
+          </button>
+          <button id="fullscreenBtn" class="iconButton" aria-label="Toggle Fullscreen" title="Toggle Fullscreen">
+            <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm10-4h-3v2h3v3h2v-5h-2zm-3-4v2h3v3h2V7h-5zm-4 0H5v5h2V7h3V5z"/></svg>
+            Fullscreen
+          </button>
+      </div>
+      <button id="motionDetectionBtn" class="iconButton" aria-label="Motion Detection" title="Motion Detection">
+        <span id="motionIcon" style="display: inline-block; width: 18px; height: 18px; border: 2px solid #e1e8ff; border-radius: 50%; position: relative; margin-right: 8px; vertical-align: middle;">
+          <span id="motionIconInner" style="display: none; width: 10px; height: 10px; background-color: white; border-radius: 50%; position: absolute; top: 3px; left: 3px;"></span>
+        </span>
+        Motion Detection
+      </button>
+      </div>
+      <div id="alerts" aria-live="assertive" aria-atomic="true" aria-relevant="all"></div>
+    </section>
+
+    <div id="subSettingsBar" role="tablist" aria-label="Settings Tabs">
+      <button id="btnDetectionZones" title="Show or hide Detection Zones & Settings" aria-selected="false" role="tab" aria-controls="detectionZones" class="tabButton">&#128064; Detection Zone & Settings</button>
+      <button id="btnNotifications" title="Show or hide Notifications" aria-selected="false" role="tab" aria-controls="notifications" class="tabButton">&#128276; Notifications</button>
+    </div>
+
+    <section id="cameraSettings" class="settingsSection" aria-label="Camera Settings" role="tabpanel" tabindex="0" style="display: block;">
+      <h2>Camera Settings</h2>
+      <div id="cameraSettingsControls">
+        <label for="cameraSelect">Select Camera:</label>
+        <select id="cameraSelectSettings" aria-describedby="cameraSelectDesc"></select>
+        <div id="cameraSelectDesc" style="font-size:0.9rem; color:#7d7d9a; margin-left:10px;">Choose your active camera device</div>
+      </div>
+    </section>
+
+    <section id="detectionZones" class="settingsSection" aria-label="Detection Zones and Settings" role="tabpanel" tabindex="0" style="display: none;">
+      <h2>Detection Zones & Settings</h2>
+      <label title="Enable or disable Motion Detection Alerts">
+        <input type="checkbox" id="motionEnable" checked /> Enable Motion-based Alerts
+      </label>
+      <label for="sensitivity" title="Adjust motion detection sensitivity">
+        Motion Sensitivity:
+      </label>
+      <input type="range" id="sensitivity" min="1" max="100" value="20" aria-valuemin="1" aria-valuemax="100" aria-valuenow="20" />
+    </section>
+
+    <section id="notifications" class="settingsSection" aria-label="Notification Settings" role="tabpanel" tabindex="0" style="display: none;">
+      <h2>Notifications</h2>
+      <label title="Toggle email notifications">
+        <input type="checkbox" id="emailToggle" checked /> Email Notifications
+      </label>
+      <label for="emailReceivers" title="Comma separated list of email recipients">
+        Email Receivers:
+      </label>
+      <textarea id="emailReceivers" placeholder="example1@mail.com, example2@mail.com"></textarea>
+
+      <label title="Toggle MQTT notifications">
+        <input type="checkbox" id="mqttToggle" /> MQTT Notifications
+      </label>
+      <small class="description">
+        MQTT notifications will send alerts to your smart home system.
+      </small>
+    </section>
+  </div>
+
+  <section id="eventLog" aria-label="Event Log">
+    <h2>Event Log</h2>
+    <div id="events">
+      <p style="text-align:center; color:#555;">No events recorded yet.</p>
+    </div>
+    <button id="clearEventsBtn" aria-label="Clear Event Log" title="Clear Event Log" style="margin-top: 1rem; background: #2a2f4a; border: none; border-radius: 10px; padding: 0.5rem 1rem; color: #e1e8ff; font-weight: 600; cursor: pointer;">Clear</button>
+  </section>
+</div>
+
+<script>
+  (() => {
+    'use strict';
+
+    // Login modal elements
+    const loginModal = document.getElementById('loginModal');
+    const loginForm = document.getElementById('loginForm');
+    const loginError = document.getElementById('loginError');
+
+    // Disable page scrolling and interaction until login
+    document.body.style.overflow = 'hidden';
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const username = loginForm.username.value.trim();
+      const password = loginForm.password.value;
+
+      if (username === 'admin' && password === 'secret') {
+        // Successful login
+        loginError.style.display = 'none';
+        loginModal.style.display = 'none';
+        document.body.style.overflow = '';
+      } else {
+        // Failed login
+        loginError.style.display = 'block';
+      }
+    });
+
+    const video = document.getElementById('webcamVideo');
+    const cameraSelectSettings = document.getElementById('cameraSelectSettings');
+    const snapshotBtn = document.getElementById('snapshotBtn');
+    const clearZoneBtn = document.getElementById('clearZoneBtn');
+    const playBtn = document.getElementById('playBtn');
+    const alerts = document.getElementById('alerts');
+    const overlayCanvas = document.getElementById('overlayCanvas');
+    const overlayCtx = overlayCanvas.getContext('2d');
+    const eventsDiv = document.getElementById('events');
+    const clearEventsBtn = document.getElementById('clearEventsBtn');
+
+    // Settings inputs
+    const motionEnable = document.getElementById('motionEnable');
+    const sensitivity = document.getElementById('sensitivity');
+    const emailToggle = document.getElementById('emailToggle');
+    const emailReceivers = document.getElementById('emailReceivers');
+    const mqttToggle = document.getElementById('mqttToggle');
+
+    // Sync camera selects
+    function syncCameraSelects(selectedId = null) {
+      if (selectedId === null) selectedId = cameraSelectSettings.value;
+      cameraSelectSettings.value = selectedId;
+    }
+
+    // Video and detection variables
+    let currentStream = null;
+    let motionThreshold = 20;
+    let motionCooldown = false;
+    let motionCooldownTimeout = 3000;
+
+    let detectionZone = null;
+    let isDrawing = false;
+    let drawStartX = 0;
+    let drawStartY = 0;
+
+    let videoWidth = 0;
+    let videoHeight = 0;
+
+    let motionDetectionStarted = false;
+    let lastFrameData = null;
+    let canvas1, canvas2, ctx1, ctx2;
+
+    // Notifications helper
+    function addEvent(message) {
+      if (eventsDiv.querySelector('p')) {
+        eventsDiv.innerHTML = '';
+      }
+      const eventTime = new Date().toLocaleTimeString();
+      const div = document.createElement('div');
+      div.className = 'event-entry';
+      div.innerHTML = `<span class="event-timestamp">[${eventTime}]</span>${message}`;
+      eventsDiv.insertBefore(div, eventsDiv.firstChild);
+      while (eventsDiv.childNodes.length > 50) {
+        eventsDiv.removeChild(eventsDiv.lastChild);
+      }
+    }
+
+    // Initialize cameras
+    async function initCameraDevices() {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(d => d.kind === 'videoinput');
+        cameraSelectSettings.innerHTML = '';
+        videoDevices.forEach((device, i) => {
+          const opt = document.createElement('option');
+          opt.value = device.deviceId;
+          opt.textContent = device.label || `Camera ${i + 1}`;
+          cameraSelectSettings.appendChild(opt);
+        });
+        if (videoDevices.length > 0) {
+          syncCameraSelects(videoDevices[0].deviceId);
+          startWebcam(videoDevices[0].deviceId);
+          addEvent(`${videoDevices.length} cameras loaded.`);
+        } else {
+          alerts.textContent = 'No camera devices found.';
+        }
+      } catch (error) {
+        console.error(error);
+        alerts.textContent = 'Error accessing camera devices.';
+      }
+    }
+
+    // Events on camera select changes
+    cameraSelectSettings.addEventListener('change', e => {
+      syncCameraSelects(e.target.value);
+      startWebcam(e.target.value);
+      addEvent(`Camera changed to: ${e.target.selectedOptions[0].textContent}`);
+    });
+
+    // Start webcam feed
+    async function startWebcam(deviceId = null) {
+      stopCurrentStream();
+      try {
+        const constraints = {
+          video: deviceId ? { deviceId: { exact: deviceId } } : true,
+          audio: false,
+        };
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = currentStream;
+
+        video.onloadedmetadata = () => {
+          videoWidth = video.videoWidth;
+          videoHeight = video.videoHeight;
+          resizeOverlayCanvas();
+          clearDetectionZone();
+        };
+
+        if (!motionDetectionStarted) {
+          startMotionDetection();
+        }
+      } catch (err) {
+        console.error(err);
+        alerts.textContent = 'Unable to access webcam.';
+      }
+    }
+
+    function stopCurrentStream() {
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+        currentStream = null;
+      }
+    }
+
+    // Resize overlay canvas to video displayed size
+    function resizeOverlayCanvas() {
+      if (videoWidth === 0) return;
+      const rect = video.getBoundingClientRect();
+      overlayCanvas.width = rect.width;
+      overlayCanvas.height = rect.height;
+      overlayCanvas.style.top = video.offsetTop + 'px';
+      overlayCanvas.style.left = video.offsetLeft + 'px';
+      drawDetectionZone();
+    }
+
+    window.addEventListener('resize', () => {
+      if (videoWidth && videoHeight) {
+        resizeOverlayCanvas();
+      }
+    });
+
+    // Get mouse position on overlay canvas
+    function getMousePos(canvas, evt) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: evt.clientX - rect.left,
+        y: evt.clientY - rect.top
+      };
+    }
+
+    // Detection zone drawing events
+    overlayCanvas.addEventListener('mousedown', (evt) => {
+      isDrawing = true;
+      const pos = getMousePos(overlayCanvas, evt);
+      drawStartX = pos.x;
+      drawStartY = pos.y;
+      detectionZone = null;
+      drawDetectionZone();
+    });
+
+    overlayCanvas.addEventListener('mousemove', (evt) => {
+      if (!isDrawing) return;
+      const pos = getMousePos(overlayCanvas, evt);
+      const x = Math.min(drawStartX, pos.x);
+      const y = Math.min(drawStartY, pos.y);
+      const width = Math.abs(pos.x - drawStartX);
+      const height = Math.abs(pos.y - drawStartY);
+      detectionZone = { x, y, width, height };
+      drawDetectionZone();
+    });
+
+    overlayCanvas.addEventListener('mouseup', () => {
+      if (!isDrawing) return;
+      isDrawing = false;
+      if (detectionZone && detectionZone.width < 10 && detectionZone.height < 10) {
+        detectionZone = null;
+      }
+      drawDetectionZone();
+    });
+
+    overlayCanvas.addEventListener('mouseout', () => {
+      if (!isDrawing) return;
+      isDrawing = false;
+      drawDetectionZone();
+    });
+
+    function drawDetectionZone() {
+      overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+      if (!detectionZone) return;
+      overlayCtx.strokeStyle = 'rgba(255, 69, 0, 0.9)';
+      overlayCtx.lineWidth = 3;
+      overlayCtx.fillStyle = 'rgba(255, 69, 0, 0.2)';
+      overlayCtx.setLineDash([8, 8]);
+      overlayCtx.strokeRect(detectionZone.x, detectionZone.y, detectionZone.width, detectionZone.height);
+      overlayCtx.fillRect(detectionZone.x, detectionZone.y, detectionZone.width, detectionZone.height);
+      overlayCtx.setLineDash([]);
+    }
+
+    clearZoneBtn.addEventListener('click', () => {
+      detectionZone = null;
+      drawDetectionZone();
+      addEvent('Detection zone cleared. Motion detection applies to full video frame.');
+    });
+
+    // Take snapshot
+    snapshotBtn.addEventListener('click', () => {
+      if (!currentStream) return;
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imgUrl = canvas.toDataURL('image/png');
+
+      const a = document.createElement('a');
+      a.href = imgUrl;
+      a.download = `snapshot_${new Date().toISOString().replace(/[:.]/g, '-')}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      addEvent(`Snapshot taken at ${new Date().toLocaleTimeString()}`);
+    });
+
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let isRecording = false;
+
+    playBtn.addEventListener('click', () => {
+      if (!currentStream) {
+        addEvent('No active webcam stream to record.');
+        return;
+      }
+      if (!isRecording) {
+        recordedChunks = [];
+        try {
+          mediaRecorder = new MediaRecorder(currentStream, { mimeType: 'video/webm' });
+        } catch (e) {
+          addEvent('MediaRecorder not supported or error: ' + e.message);
+          return;
+        }
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            recordedChunks.push(event.data);
+          }
+        };
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(recordedChunks, { type: 'video/webm' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = url;
+          a.download = `recording_${new Date().toISOString().replace(/[:.]/g, '-')}.webm`;
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }, 100);
+          addEvent(`Recording saved at ${new Date().toLocaleTimeString()}`);
+        };
+        mediaRecorder.start();
+        isRecording = true;
+        addEvent('Recording started.');
+        // Change icon to pause
+        playBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg> Pause';
+      } else {
+        mediaRecorder.stop();
+        isRecording = false;
+        addEvent('Recording stopped.');
+        // Change icon to play
+        playBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Record';
+      }
+    });
+
+    // Motion detection logic
+    function startMotionDetection() {
+      canvas1 = document.createElement('canvas');
+      canvas2 = document.createElement('canvas');
+      ctx1 = canvas1.getContext('2d');
+      ctx2 = canvas2.getContext('2d');
+
+      motionDetectionStarted = true;
+      requestAnimationFrame(motionLoop);
+    }
+
+    function motionLoop() {
+      if (!motionDetectionStarted) {
+        return;
+      }
+      if (!currentStream) {
+        requestAnimationFrame(motionLoop);
+        return;
+      }
+      const width = video.videoWidth;
+      const height = video.videoHeight;
+      if (width === 0 || height === 0) {
+        requestAnimationFrame(motionLoop);
+        return;
+      }
+      canvas1.width = width;
+      canvas1.height = height;
+      canvas2.width = width;
+      canvas2.height = height;
+
+      ctx1.drawImage(video, 0, 0, width, height);
+      const currentFrame = ctx1.getImageData(0, 0, width, height);
+
+      if (lastFrameData) {
+        ctx2.putImageData(lastFrameData, 0, 0);
+        const prevFrame = lastFrameData;
+        let diff = 0;
+
+        let scaleX = width / overlayCanvas.width;
+        let scaleY = height / overlayCanvas.height;
+
+        let checkX = 0, checkY = 0, checkWidth = width, checkHeight = height;
+
+        if (detectionZone) {
+          checkX = Math.floor(detectionZone.x * scaleX);
+          checkY = Math.floor(detectionZone.y * scaleY);
+          checkWidth = Math.floor(detectionZone.width * scaleX);
+          checkHeight = Math.floor(detectionZone.height * scaleY);
+
+          checkX = Math.max(0, Math.min(checkX, width-1));
+          checkY = Math.max(0, Math.min(checkY, height-1));
+          if (checkX + checkWidth > width) checkWidth = width - checkX;
+          if (checkY + checkHeight > height) checkHeight = height - checkY;
+        }
+
+        for (let y = checkY; y < checkY + checkHeight; y++) {
+          let rowIndex = y * width * 4;
+          for (let x = checkX; x < checkX + checkWidth; x++) {
+            const idx = rowIndex + x * 4;
+            const rDiff = Math.abs(currentFrame.data[idx] - prevFrame.data[idx]);
+            const gDiff = Math.abs(currentFrame.data[idx + 1] - prevFrame.data[idx + 1]);
+            const bDiff = Math.abs(currentFrame.data[idx + 2] - prevFrame.data[idx + 2]);
+            diff += rDiff + gDiff + bDiff;
+            if (diff > motionThreshold * checkWidth * checkHeight) {
+              if (!motionCooldown) {
+                onMotionDetected();
+                motionCooldown = true;
+                setTimeout(() => motionCooldown = false, motionCooldownTimeout);
+              }
+              y = checkY + checkHeight;
+              break;
+            }
+          }
+        }
+      }
+
+      lastFrameData = currentFrame;
+      requestAnimationFrame(motionLoop);
+    }
+
+    function onMotionDetected() {
+      if (!motionEnable.checked) return;
+      if (!motionPressed) return;
+      // Removed alert popup, only add event log entry
+      addEvent(`Motion detected at ${new Date().toLocaleTimeString()}`);
+    }
+
+    window.onload = () => {
+      initCameraDevices();
+    };
+  })();
+
+  // Tab switching logic for settings sections
+  (() => {
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const videoSection = document.getElementById('videoSection');
+
+    fullscreenBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        if (videoSection.requestFullscreen) {
+          videoSection.requestFullscreen();
+        } else if (videoSection.webkitRequestFullscreen) { /* Safari */
+          videoSection.webkitRequestFullscreen();
+        } else if (videoSection.msRequestFullscreen) { /* IE11 */
+          videoSection.msRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) { /* Safari */
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) { /* IE11 */
+          document.msExitFullscreen();
+        }
+      }
+    });
+  })();
+
+  // Tab switching logic for settings sections
+  (() => {
+    const btnDetectionZones = document.getElementById('btnDetectionZones');
+    const btnNotifications = document.getElementById('btnNotifications');
+    const detectionZones = document.getElementById('detectionZones');
+    const notifications = document.getElementById('notifications');
+
+    function hideAll() {
+      detectionZones.style.display = 'none';
+      notifications.style.display = 'none';
+      btnDetectionZones.classList.remove('active');
+      btnNotifications.classList.remove('active');
+      btnDetectionZones.setAttribute('aria-selected', 'false');
+      btnNotifications.setAttribute('aria-selected', 'false');
+    }
+
+    btnDetectionZones.addEventListener('click', () => {
+      if (detectionZones.style.display === 'none') {
+        hideAll();
+        detectionZones.style.display = 'block';
+        btnDetectionZones.classList.add('active');
+        btnDetectionZones.setAttribute('aria-selected', 'true');
+      } else {
+        hideAll();
+      }
+    });
+
+    btnNotifications.addEventListener('click', () => {
+      if (notifications.style.display === 'none') {
+        hideAll();
+        notifications.style.display = 'block';
+        btnNotifications.classList.add('active');
+        btnNotifications.setAttribute('aria-selected', 'true');
+      } else {
+        hideAll();
+      }
+    });
+
+    // Initialize with camera settings visible
+    document.getElementById('cameraSettings').style.display = 'block';
+    hideAll();
+  })();
+
+  // Clear event log button
+  document.getElementById('clearEventsBtn').addEventListener('click', () => {
+    const eventsDiv = document.getElementById('events');
+    eventsDiv.innerHTML = '<p style="text-align:center; color:#555;">No events recorded yet.</p>';
+  });
+
+  // Motion Detection button event listener and handler
+  const motionDetectionBtn = document.getElementById('motionDetectionBtn');
+  const motionIconInner = document.getElementById('motionIconInner');
+  let motionPressed = false;
+
+  motionDetectionBtn.addEventListener('click', () => {
+    motionPressed = !motionPressed;
+    if (motionPressed) {
+      motionIconInner.style.display = 'block';
+      startMotionDetection();
+      addEvent('Motion detection activated.');
+    } else {
+      motionIconInner.style.display = 'none';
+      stopMotionDetection();
+      addEvent('Motion detection deactivated.');
+    }
+    onMotionDetectionButtonClick();
+  });
+
+  function stopMotionDetection() {
+    motionDetectionStarted = false;
+    lastFrameData = null;
+  }
+
+  function onMotionDetectionButtonClick() {
+    const eventsDiv = document.getElementById('events');
+    const eventTime = new Date().toLocaleTimeString();
+    const div = document.createElement('div');
+    div.className = 'event-entry';
+    div.innerHTML = `<span class="event-timestamp">[${eventTime}]</span>Motion Detection button pressed.`;
+    eventsDiv.insertBefore(div, eventsDiv.firstChild);
+    while (eventsDiv.childNodes.length > 50) {
+      eventsDiv.removeChild(eventsDiv.lastChild);
+    }
+  }
+</script>
+</body>
+</html>
