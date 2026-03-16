@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NoteMind</title>
+<link rel="stylesheet" href="popup.css">
+</head>
+<body>
+<div id="app">
+
+  <div class="hd">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="7" cy="7" r="2.5" fill="#111"/>
+          <line x1="7" y1="1" x2="7" y2="4" stroke="#111" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="7" y1="10" x2="7" y2="13" stroke="#111" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="1" y1="7" x2="4" y2="7" stroke="#111" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="10" y1="7" x2="13" y2="7" stroke="#111" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="brand-name">notemind <span>/ meeting</span></span>
+    </div>
+    <div class="hd-r">
+      <div class="srv-pill">
+        <div class="srv-dot wait" id="srvDot"></div>
+        <span id="srvTxt">server</span>
+      </div>
+      <button class="icon-btn" id="settingsBtn" title="Settings">
+        <svg viewBox="0 0 13 13"><circle cx="6.5" cy="6.5" r="2"/><path d="M6.5 1v1.5M6.5 10v1.5M1 6.5h1.5M10 6.5h1.5"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="settings" id="settingsPanel" style="display:none">
+    <div class="settings-hd">configuration</div>
+    <div class="field">
+      <label>Anthropic API key</label>
+      <input type="password" id="anthropicKey" placeholder="sk-ant-..." />
+    </div>
+    <div class="field">
+      <label>Whisper model</label>
+      <select id="whisperModel">
+        <option value="large-v3">large-v3 — 97% accuracy (recommended, 16GB RAM)</option>
+        <option value="medium">medium — 94% accuracy (5GB RAM)</option>
+        <option value="base">base — 90% accuracy (1GB RAM)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Speaker names <span style="color:var(--t4)">(optional)</span></label>
+      <input type="text" id="speakerNames" placeholder="Alice, Bob, Charlie" />
+      <div class="field-hint">Comma-separated — helps AI label speakers</div>
+    </div>
+    <div class="field">
+      <label>Language</label>
+      <select id="meetingLang">
+        <option value="en">English</option>
+        <option value="es">Spanish</option>
+        <option value="fr">French</option>
+        <option value="de">German</option>
+        <option value="zh">Chinese</option>
+        <option value="ja">Japanese</option>
+        <option value="pt">Portuguese</option>
+        <option value="ar">Arabic</option>
+      </select>
+    </div>
+    <button class="save-btn" id="saveBtn">Save settings</button>
+    <div class="saved-ok" id="savedOk" style="display:none">Saved</div>
+  </div>
+
+  <div id="mainView">
+    <div class="body">
+      <div class="st-row">
+        <div class="st-left">
+          <div class="st-dot" id="stDot"></div>
+          <span class="st-txt" id="stTxt">ready</span>
+        </div>
+        <span class="timer" id="timerEl">00:00</span>
+      </div>
+
+      <div class="srv-warn" id="srvWarn" style="display:none">
+        Server offline — <a id="srvLink" href="#">start server.py first</a>
+      </div>
+
+      <div class="wave" id="waveEl"></div>
+
+      <div class="spk-row" id="spkRow" style="display:none"></div>
+
+      <div class="tx-lbl">transcript</div>
+      <div class="tx" id="txEl">
+        <div class="tx-ph">Start recording — transcript appears here with speaker labels...</div>
+      </div>
+
+      <div class="ctrl">
+        <button class="btn-rec idle" id="recBtn">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="3.5"/></svg>
+          <span id="recTxt">Record tab audio</span>
+        </button>
+        <button class="btn-sq" id="clearBtn" title="Clear">
+          <svg viewBox="0 0 12 12"><path d="M2 2l8 8M10 2l-8 8"/></svg>
+        </button>
+      </div>
+
+      <div class="gen-bar" id="genBar" style="display:none">
+        <div class="gen-meta"><strong id="wcLabel">0 words</strong> <span id="spkMeta"></span></div>
+        <button class="btn-gen" id="genBtn">
+          <svg viewBox="0 0 11 11"><path d="M5.5 1l1 3L9.5 5.5 6.5 6.5 5.5 10 4.5 6.5 1.5 5.5l3-1z"/></svg>
+          Generate notes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="notesView" style="display:none">
+    <div class="notes-body">
+      <div class="nph">
+        <button class="npback" id="backBtn">← back</button>
+        <span class="npt" id="noteTitle">Meeting notes</span>
+        <button class="npexp" id="exportBtn">export</button>
+      </div>
+      <div class="tabs">
+        <div class="tab active" data-tab="t1">summary</div>
+        <div class="tab" data-tab="t2">speakers</div>
+        <div class="tab" data-tab="t3">actions</div>
+      </div>
+      <div id="t1"></div>
+      <div id="t2" style="display:none"></div>
+      <div id="t3" style="display:none"></div>
+    </div>
+  </div>
+
+</div>
+<script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+# NoteMind Server — Python Requirements
+# Install with: pip install -r requirements.txt
+
+# Core AI
+openai-whisper>=20231117
+pyannote.audio>=3.1.0
+
+# Audio processing
+torchaudio>=2.0.0
+torch>=2.0.0
+ffmpeg-python>=0.2.0
+
+# Server
+websockets>=12.0
+
+# Utilities
+numpy>=1.24.0
